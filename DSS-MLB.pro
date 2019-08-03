@@ -25,13 +25,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        gamemodel.cpp \
         gamewidget.cpp \
         main.cpp \
         menuwidget.cpp
 
 HEADERS += \
+    gamemodel.h \
     gamewidget.h \
-    menuwidget.h
+    menuwidget.h \
+    statiddata.h
 
 FORMS += \
         mainwindow.ui
