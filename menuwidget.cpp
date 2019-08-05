@@ -1,8 +1,10 @@
 #include "menuwidget.h"
+
+#include <ctime>
+#include <sstream>
+
 #include <QDesktopWidget>
 #include <QApplication>
-#include <fstream>
-#include <QMessageBox>
 #include <QNetworkConfigurationManager>
 
 #include <QJsonObject>
@@ -16,9 +18,14 @@ MenuWidget::MenuWidget(QWidget *parent) : QWidget(parent)
 
     menuLayout = new QHBoxLayout;
     networkAccessManager = new QNetworkAccessManager(this);
+    connect(networkAccessManager, &QNetworkAccessManager::finished, this, &MenuWidget::onResult);
 }
 
-bool MenuWidget::initLayout()
+/*
+ * Function: Init Layout
+ * Description:
+ */
+void MenuWidget::initLayout()
 {
     menuLayout->setAlignment(Qt::AlignCenter);
 
@@ -35,24 +42,25 @@ bool MenuWidget::initLayout()
 
 
     this->setLayout(menuLayout);
-    return true;
 }
 
-bool MenuWidget::initNetwork()
+/*
+ * Function: Init Network
+ * Description:
+ */
+void MenuWidget::initNetwork()
 {
     QNetworkConfigurationManager mgr;
     if(!mgr.isOnline())
     {
-        errorMsg("You are not connected to the internet :(");
-        return false;
+        errorHandler.errorBox(this,"Internet connection is not established.");
+        exit(EXIT_FAILURE);
     }
 
-    QUrl url(baseURL.c_str());
-    QNetworkRequest request;
-    request.setUrl(url);
+    std::string completeURL = baseURLStart + getDate() + baseURLEnd;
+    QUrl url(completeURL.c_str());
+    QNetworkRequest request(url);
     networkAccessManager->get(request);
-    connect(networkAccessManager, &QNetworkAccessManager::finished, this, &MenuWidget::onResult);
-    return true;
 }
 
 MenuWidget::~MenuWidget()
@@ -68,17 +76,20 @@ MenuWidget::~MenuWidget()
     delete networkAccessManager;
 }
 
+/*
+ * Function: Key Press Event
+ * Description:
+ */
 void MenuWidget::keyPressEvent(QKeyEvent *event)
 {
     if(event == nullptr)
     {
-        qDebug() << "Error occurred in keyPressEvent(QKeyEvent *).";
+        errorHandler.errorLog("Error occurred in keyPressEvent(QKeyEvent *).");
         return;
     }
 
     switch (event->key()) {
     case Qt::Key_Left:
-        qDebug() << "Left";
         if(focusedGame == head)
         {
             if(selectedGameDataIdx > 0)
@@ -100,7 +111,6 @@ void MenuWidget::keyPressEvent(QKeyEvent *event)
         break;
 
     case Qt::Key_Right:
-        qDebug() << "Right";
         if(focusedGame == tail)
         {
             if(selectedGameDataIdx < gameDataList.size()-1)
@@ -125,15 +135,16 @@ void MenuWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
-//figure out a consistent error handling
+/*
+ * Function: On Result
+ * Description:
+ */
 void MenuWidget::onResult(QNetworkReply *reply)
 {
     if(reply->error() != QNetworkReply::NoError){
-        errorMsg("there was an error");
-        return;
+        errorHandler.errorBox(this,"HTTP Request failed.");
+        exit(EXIT_FAILURE);
     }
-
-    qDebug() << "Got to here";
 
     QJsonObject jsonObj;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(QString(reply->readAll()).toUtf8());
@@ -146,14 +157,14 @@ void MenuWidget::onResult(QNetworkReply *reply)
         }
         else
         {
-            errorMsg("Invalid URL input");
-            return;
+            errorHandler.errorBox(this, "Invalid URL input");
+            exit(EXIT_FAILURE);
         }
     }
     else
     {
-        errorMsg("Invalid JSON...");
-        return;
+        errorHandler.errorBox(this, "Invalid JSON...");
+        exit(EXIT_FAILURE);
     }
 
     if (jsonObj.contains("dates") && jsonObj["dates"].isArray())
@@ -174,42 +185,49 @@ void MenuWidget::onResult(QNetworkReply *reply)
 
                  if(gameDataList.size() == 0)
                  {
-                     qDebug() << "Game data list is empty";
+                     errorHandler.errorLog("Game data list is empty.");
                      return;
                  }
                  for(unsigned int i = 0; i < maxGamesDisplay; i++)
                  {
                      insertLast(gameDataList[i]);
-                     tail->setSelected(false);
+                     if(i != 0)
+                     {
+                         tail->setSelected(false);
+                     }
                  }
-                 head->setSelected(true);
                  focusedGame = head;
 
              }
              else
              {
-                 qDebug() << "Games JSON does not exist" << endl;
+                 errorHandler.errorLog("Dates->Games JSON does not exist.");
              }
          }
          else
          {
-             qDebug() << "Dates is empty" << endl;
+             errorHandler.errorLog("Dates Array JSON is empty.");
          }
     }
     else
     {
-        qDebug() << "Dates JSON does not exist " << endl;
+        errorHandler.errorLog("Dates JSON does not exist.");
     }
 
     reply->deleteLater();
 }
 
+/*
+ * Function: Insert First
+ * Description:
+ */
 bool MenuWidget::insertFirst(const GameModel & g)
 {
     GameWidget * ng = new GameWidget();
-    ng->setSelected(true);
     ng->initLayout(maxWidth/maxGamesDisplay, maxHeight/(maxGamesDisplay-1));
     ng->initData(g);
+    ng->setSelected(true);
+
 
     ng->setNext(head);
     if(head != nullptr)
@@ -226,6 +244,10 @@ bool MenuWidget::insertFirst(const GameModel & g)
     return true;
 }
 
+/*
+ * Function: Insert Last
+ * Description:
+ */
 bool MenuWidget::insertLast(const GameModel & g)
 {
     if(head == nullptr)
@@ -234,9 +256,9 @@ bool MenuWidget::insertLast(const GameModel & g)
     }
 
     GameWidget * ng = new GameWidget();
-    ng->setSelected(true);
     ng->initLayout(maxWidth/maxGamesDisplay, maxHeight/(maxGamesDisplay-1));
     ng->initData(g);
+    ng->setSelected(true);
 
     ng->setPrev(tail);
     tail->setNext(ng);
@@ -246,6 +268,10 @@ bool MenuWidget::insertLast(const GameModel & g)
     return true;
 }
 
+/*
+ * Function: Delete First
+ * Description:
+ */
 bool MenuWidget::deleteFirst()
 {
     if(head == nullptr)
@@ -268,6 +294,10 @@ bool MenuWidget::deleteFirst()
     return true;
 }
 
+/*
+ * Function: Delete Last
+ * Description:
+ */
 bool MenuWidget::deleteLast()
 {
     if(tail == nullptr)
@@ -288,8 +318,66 @@ bool MenuWidget::deleteLast()
     return true;
 }
 
-
-void MenuWidget::errorMsg(const char * msg)
+/*
+ * Function: Get Date
+ * Description:
+ */
+std::string MenuWidget::getDate()
 {
-    QMessageBox::critical(this, "Info", msg);
+    time_t tt;
+    time( &tt );
+    tm TM = *localtime( &tt );
+    std::stringstream ss;
+
+    int year = TM.tm_year+1900;
+    int month = TM.tm_mon+1;
+    int day= TM.tm_mday;
+
+    if(day == 1)
+        {
+            //months which have 30 days in previous month
+            if(month == 4|| month == 6 || month == 9|| month == 11)
+            {
+                day = 31;
+                month--;
+            }
+            //for MARCH, to define february last day
+            else if(month==3)
+            {
+                if(year%4==0)
+                    day=29;
+                else
+                    day=28;
+
+                month--;
+            }
+            //for January, to define December last day
+            else if(month==1)
+            {
+                day=31;
+                month = 12;
+                year--;
+            }
+            //for Feb, to define January last day
+            else if(month==2)
+            {
+                day=31;
+                month--;
+            }
+            //for other months
+            else
+            {
+                day=30;
+                month--;
+            }
+        }
+    else
+    {
+        day--;
+    }
+    ss << year << '-' << month << '-' << day;
+    return ss.str();
 }
+
+
+

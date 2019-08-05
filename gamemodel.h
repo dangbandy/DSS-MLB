@@ -1,7 +1,11 @@
+/*
+ *  Author: Andy Dang
+ *  Date: 8/2/2019
+ *  Description:
+ */
 #ifndef GAMEMODEL_H
 #define GAMEMODEL_H
 
-#include <iostream>
 #include "statiddata.h"
 #include <QJsonObject>
 
@@ -15,7 +19,7 @@ public:
     QString getThumbNail() const;
     QString getDescription() const;
 
-    bool read(const QJsonObject &json);
+    void read(const QJsonObject &json);
 
 private:
     QString title, thumbnail, description;

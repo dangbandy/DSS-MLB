@@ -4,15 +4,14 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    qDebug() << "SslSupport: " << QSslSocket::supportsSsl();
+    qDebug() << "SslLibraryBuildVersion: " << QSslSocket::sslLibraryBuildVersionString();
+    qDebug() << "SslLibraryRuntimeVersion: " << QSslSocket::sslLibraryVersionString();
+
     MenuWidget * menu = new MenuWidget();
-    if(!menu->initNetwork()){
-        a.quit();
-        return 0;
-    }
-    if(!menu->initLayout()){
-        a.quit();
-        return 0;
-    }
+    menu->initNetwork();
+    menu->initLayout();
     menu->show();
 
     return a.exec();

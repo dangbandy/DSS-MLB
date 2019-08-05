@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network script
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,12 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        errorhandler.cpp \
         gamemodel.cpp \
         gamewidget.cpp \
         main.cpp \
         menuwidget.cpp
 
 HEADERS += \
+    errorhandler.h \
     gamemodel.h \
     gamewidget.h \
     menuwidget.h \

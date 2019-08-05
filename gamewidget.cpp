@@ -1,7 +1,6 @@
 #include "gamewidget.h"
 #include <QByteArray>
 
-
 GameWidget::GameWidget(QWidget *parent) : QWidget(parent)
 {
 
@@ -15,6 +14,7 @@ GameWidget::GameWidget(QWidget *parent) : QWidget(parent)
 
     next = prev = nullptr;
 
+    thumbImg.load(noImgName.c_str());
     thumbnailWidth = 0;
     thumbnailHeight = 0;
     selected = false;
@@ -26,9 +26,14 @@ GameWidget::~GameWidget()
     delete gameTitle;
     delete gameThumbnail;
     delete gameDescription;
+    delete networkAccessManager;
 }
 
-bool GameWidget::initLayout(int w, int h)
+/*
+ * Function: Init Layout
+ * Description:
+ */
+void GameWidget::initLayout(int w, int h)
 {
     gameLayout->setAlignment(Qt::AlignVCenter);
     this->setLayout(gameLayout);
@@ -41,7 +46,7 @@ bool GameWidget::initLayout(int w, int h)
     gameTitle->setFont(QFont("Arial", h/15, QFont::Bold));
     gameTitle->setStyleSheet("QLabel { color : white; }");
 
-    gameThumbnail->setAlignment(Qt::AlignCenter);
+    gameThumbnail->setAlignment(Qt::AlignHCenter);
 
     gameDescription->setAlignment(Qt::AlignCenter);
     gameDescription->setWordWrap(true);
@@ -51,16 +56,18 @@ bool GameWidget::initLayout(int w, int h)
     gameLayout->addWidget(gameTitle);
     gameLayout->addWidget(gameThumbnail);
     gameLayout->addWidget(gameDescription);
-
-    return true;
 }
 
-bool GameWidget::initData(const GameModel & g)
+void GameWidget::initData(const GameModel & g)
 {
     gameData = g;
+    if(!gameData.getThumbNail().isEmpty())
+    {
+        QUrl url(gameData.getThumbNail());
+        QNetworkRequest request(url);
+        networkAccessManager->get(request);
+    }
     display();
-
-    return true;
 }
 
 
@@ -90,6 +97,10 @@ GameWidget *GameWidget::getNext() const
     return next;
 }
 
+/*
+ * Function:
+ * Description:
+ */
 void GameWidget::display()
 {
     if(selected)
@@ -105,42 +116,26 @@ void GameWidget::display()
         gameDescription->setText("");
         thumbnailWidth = int(this->width() * .5);
         thumbnailHeight = int((this->height()/2) * .5);
+
     }
 
-
-    if(gameData.getThumbNail().isEmpty())
-    {
-        QPixmap thumbImg;
-        thumbImg.load(noImgName.c_str());
-        gameThumbnail->setPixmap(thumbImg.scaled(thumbnailWidth,thumbnailHeight, Qt::KeepAspectRatio));
-    }
-    else
-    {
-        //qDebug() << "URL: " << gameData.getThumbNail();
-        QUrl url;
-        url = QUrl::fromEncoded(gameData.getThumbNail().toStdString().c_str());
-        QNetworkRequest request;
-        request.setUrl(url);
-        networkAccessManager->get(request);
-    }
-
+    gameThumbnail->setPixmap(thumbImg.scaled(thumbnailWidth,thumbnailHeight, Qt::KeepAspectRatio,Qt::SmoothTransformation));
 }
 
-bool GameWidget::loadThumbnail(QNetworkReply *reply)
+/*
+ * Function:
+ * Description:
+ */
+void GameWidget::loadThumbnail(QNetworkReply *reply)
 {
     if (reply->error() != QNetworkReply::NoError)
     {
-        qDebug() << "Error loading img from URL.";
-        return false;
+        errorHandler.errorLog("Error retrieving img from " + gameData.getThumbNail().toStdString());
+        return;
     }
-    /*
     QByteArray thumbImgBytes = reply->readAll();
-    QPixmap thumbImg;
     thumbImg.loadFromData(thumbImgBytes);
-    gameThumbnail->setPixmap(thumbImg.scaled(thumbnailWidth,thumbnailHeight, Qt::KeepAspectRatio));
-    */
-    qDebug() << "";
+    display();
     reply->deleteLater();
-    return true;
 }
 

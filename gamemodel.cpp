@@ -3,14 +3,14 @@
 
 GameModel::GameModel()
 {
-    title = "No Title";
-    description = "No Description";
+    title = "Title missing";
+    description = "Description missing";
 }
 
 GameModel::GameModel(const QJsonObject &json)
 {
-    title = "No Title";
-    description = "No Description";
+    title = "Title missing";
+    description = "Description missing";
     read(json);
 }
 
@@ -34,7 +34,11 @@ QString GameModel::getDescription() const
     return description;
 }
 
-bool GameModel::read(const QJsonObject &json)
+/*
+ * Function: Read
+ * Description:
+ */
+void GameModel::read(const QJsonObject &json)
 {
     //Parse Title
     if(json.contains("teams") && json["teams"].isObject())
@@ -50,11 +54,11 @@ bool GameModel::read(const QJsonObject &json)
                 title += homeTeamJson["name"].toString() + " vs ";
             }
             else {
-                qDebug() << "Home Team JSON does not exist" << endl;
+                errorHandler.errorLog("Home->Team JSON does not exist");
             }
         }
         else {
-            qDebug() << "Teams Home JSON does not exist" << endl;
+            errorHandler.errorLog("Teams->Home JSON does not exist");
         }
 
         if(teamsJson.contains("away") && teamsJson["away"].isObject())
@@ -65,16 +69,16 @@ bool GameModel::read(const QJsonObject &json)
                 title += awayTeamJson["name"].toString();
             }
             else {
-                qDebug() << "Away Team JSON does not exist" << endl;
+                errorHandler.errorLog("Away->Team JSON does not exist");
             }
         }
         else {
-            qDebug() << "Teams Away JSON does not exist" << endl;
+            errorHandler.errorLog("Teams->Away JSON does not exist");
         }
     }
     else
     {
-        qDebug() << "Teams JSON does not exist" << endl;
+        errorHandler.errorLog("Teams JSON does not exist");
     }
 
 
@@ -102,12 +106,12 @@ bool GameModel::read(const QJsonObject &json)
                         }
                         else
                         {
-                            qDebug() << "Content Editorial Recap Mlb Image Cuts JSON array does not exist" << endl;
+                            errorHandler.errorLog("Content->Editorial->Recap->Mlb->Image->Cuts JSON array does not exist");
                         }
                     }
                     else
                     {
-                        qDebug() << "Content Editorial Recap Mlb Image JSON does not exist" << endl;
+                        errorHandler.errorLog("Content->Editorial->Recap->Mlb->Image JSON does not exist");
                     }
                     //Parse description
                     if(mlbJson.contains("headline") && mlbJson["headline"].isString())
@@ -118,27 +122,23 @@ bool GameModel::read(const QJsonObject &json)
                 }
                 else
                 {
-                    qDebug() << "Content Editorial Recap Mlb JSON does not exist" << endl;
+                    errorHandler.errorLog("Content->Editorial->Recap->Mlb JSON does not exist");
                 }
             }
             else
             {
-                qDebug() << "Content Editorial Recap JSON does not exist" << endl;
+                errorHandler.errorLog("Content->Editorial->Recap JSON does not exist");
             }
         }
         else
         {
-            qDebug() << "Content Editorial JSON does not exist" << endl;
+            errorHandler.errorLog("Content->Editorial JSON does not exist");
         }
 
     }
     else
     {
-        qDebug() << "Content JSON does not exist." << endl;
+        errorHandler.errorLog("Content JSON does not exist.");
     }
-
-    qDebug() << "Title: " << title;
-    qDebug() << "Thumbnail: " << thumbnail;
-    qDebug() << "Description: " << description << endl;
-    return true;
 }
+

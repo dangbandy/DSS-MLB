@@ -1,3 +1,8 @@
+/*
+ *  Author: Andy Dang
+ *  Date: 8/1/2019
+ *  Description:
+ */
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
@@ -20,8 +25,8 @@ public:
     explicit GameWidget(QWidget *parent = nullptr);
     ~GameWidget();
 
-    bool initLayout(int w, int h);
-    bool initData(const GameModel & g);
+    void initLayout(int w, int h);
+    void initData(const GameModel & g);
 
     void setSelected(bool value);
 
@@ -33,7 +38,7 @@ public:
 
 private:
     void display();
-    bool loadThumbnail(QNetworkReply *reply);
+    void loadThumbnail(QNetworkReply *reply);
 
     QVBoxLayout *gameLayout;
     QLabel * gameTitle;
@@ -46,8 +51,10 @@ private:
     GameWidget *next;
     GameWidget *prev;
 
+    QPixmap thumbImg;
     int thumbnailWidth;
     int thumbnailHeight;
     bool selected;
+
 };
 #endif // GAMEWIDGET_H

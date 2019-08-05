@@ -10,6 +10,11 @@
 #include <QHBoxLayout>
 
 #include <QNetworkAccessManager>
+/*
+ *  Author: Andy Dang
+ *  Date: 8/1/2019
+ *  Description:
+ */
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
@@ -22,8 +27,8 @@ class MenuWidget : public QWidget
 public:
     explicit MenuWidget(QWidget *parent = nullptr);
     ~MenuWidget();
-    bool initLayout();
-    bool initNetwork();
+    void initLayout();
+    void initNetwork();
 
 protected:
   virtual void  keyPressEvent(QKeyEvent *event);
@@ -37,7 +42,7 @@ private:
     bool deleteFirst();
     bool deleteLast();
 
-    void errorMsg(const char * msg);
+    std::string getDate();
 
     QHBoxLayout *menuLayout;
     QNetworkAccessManager * networkAccessManager;
@@ -51,5 +56,6 @@ private:
 
     int maxHeight;
     int maxWidth;
+
 };
 #endif // MENUWIDGET_H
