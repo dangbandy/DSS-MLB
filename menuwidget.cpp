@@ -78,13 +78,31 @@ MenuWidget::~MenuWidget()
 
 /*
  * KeyPressEvent listens for the left and right arrow keys input. If the input is left,
- * the
+ * the following logic will determine the key's functionality:
+ *      If the current focused/selected GameWidget is the very left/head and the next
+ * game data is within the boundary of the GameDataList indices, then insert a new
+ * GameWidget with the next game data onto the doubly linked list. Afterward, remove
+ * the most right/tail out of the list and display.
+ *
+ *      Otherwise, if the current focused/selected GameWidget is not the very left/head
+ * and the next game data is within the boundary of the GameDataList indices, then move
+ * the focused GameWidget to its next.
+ *
+ * If the input is right, then the same logic applies to insert to the most right/tail,
+ * remove the most left/head, and set the new focused GameWidget.
+ *
  */
 void MenuWidget::keyPressEvent(QKeyEvent * event)
 {
     if(event == nullptr)
     {
         errorHandler.errorLog("Error occurred in keyPressEvent(QKeyEvent *).");
+        return;
+    }
+
+    if(head == nullptr)
+    {
+        errorHandler.errorLog("User attempted to move focused game before the InitData function was called.");
         return;
     }
 
