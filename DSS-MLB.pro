@@ -5,8 +5,9 @@
 #-------------------------------------------------
 
 QT       += core gui network
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+INCLUDEPATH += C:/OpenSSL-Win32/include
 
 TARGET = DSS-MLB
 TEMPLATE = app
@@ -32,11 +33,11 @@ SOURCES += \
         menuwidget.cpp
 
 HEADERS += \
+    constants.h \
     errorhandler.h \
     gamemodel.h \
     gamewidget.h \
-    menuwidget.h \
-    statiddata.h
+    menuwidget.h
 
 FORMS += \
         mainwindow.ui

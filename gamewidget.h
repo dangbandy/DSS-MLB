@@ -1,12 +1,12 @@
 /*
  *  Author: Andy Dang
  *  Date: 8/1/2019
- *  Description:
+ *  Description: GameWidget acts as a node to the MenuWidget. It will also display the game's data.
  */
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
-#include "statiddata.h"
+#include "constants.h"
 #include "gamemodel.h"
 
 #include <QWidget>
@@ -20,9 +20,8 @@
 class GameWidget : public QWidget
 {
     Q_OBJECT
-
 public:
-    explicit GameWidget(QWidget *parent = nullptr);
+    explicit GameWidget(QWidget * parent = nullptr);
     ~GameWidget();
 
     void initLayout(int w, int h);
@@ -30,26 +29,26 @@ public:
 
     void setSelected(bool value);
 
-    void setNext(GameWidget *gw);
-    void setPrev(GameWidget *gw);
+    void setNext(GameWidget * gw);
+    void setPrev(GameWidget * gw);
 
-    GameWidget *getPrev() const;
-    GameWidget *getNext() const;
+    GameWidget * getPrev() const;
+    GameWidget * getNext() const;
 
 private:
     void display();
-    void loadThumbnail(QNetworkReply *reply);
+    void loadThumbnail(QNetworkReply * reply);
 
     QVBoxLayout *gameLayout;
     QLabel * gameTitle;
     QLabel * gameThumbnail;
     QLabel * gameDescription;
 
-    QNetworkAccessManager* networkAccessManager;
+    QNetworkAccessManager * networkAccessManager;
 
     GameModel gameData;
-    GameWidget *next;
-    GameWidget *prev;
+    GameWidget * next;
+    GameWidget * prev;
 
     QPixmap thumbImg;
     int thumbnailWidth;

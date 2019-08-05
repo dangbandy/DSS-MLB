@@ -1,7 +1,7 @@
 #include "gamewidget.h"
 #include <QByteArray>
 
-GameWidget::GameWidget(QWidget *parent) : QWidget(parent)
+GameWidget::GameWidget(QWidget * parent) : QWidget(parent)
 {
 
     gameLayout = new QVBoxLayout;
@@ -30,8 +30,8 @@ GameWidget::~GameWidget()
 }
 
 /*
- * Function: Init Layout
- * Description:
+ * InitLayout sets the size of the application to the current screen's resolution.
+ * Graphical object properties will also be initialized and added to the layout.
  */
 void GameWidget::initLayout(int w, int h)
 {
@@ -58,6 +58,10 @@ void GameWidget::initLayout(int w, int h)
     gameLayout->addWidget(gameDescription);
 }
 
+/*
+ * InitData determines whether the game data have a valid URL. If so,
+ * it will attempt a get request to retrieve the image from the URL.
+ */
 void GameWidget::initData(const GameModel & g)
 {
     gameData = g;
@@ -70,19 +74,18 @@ void GameWidget::initData(const GameModel & g)
     display();
 }
 
-
 void GameWidget::setSelected(bool value)
 {
     selected = value;
     display();
 }
 
-void GameWidget::setNext(GameWidget *gw)
+void GameWidget::setNext(GameWidget * gw)
 {
     next = gw;
 }
 
-void GameWidget::setPrev(GameWidget *gw)
+void GameWidget::setPrev(GameWidget * gw)
 {
     prev = gw;
 }
@@ -98,8 +101,9 @@ GameWidget *GameWidget::getNext() const
 }
 
 /*
- * Function:
- * Description:
+ * Display decides whether to show the title and description or not based whether
+ * object is selected in the MenuWidget. The size of the thumbnail will shrink to 50%
+ * if the object is not selected.
  */
 void GameWidget::display()
 {
@@ -116,17 +120,16 @@ void GameWidget::display()
         gameDescription->setText("");
         thumbnailWidth = int(this->width() * .5);
         thumbnailHeight = int((this->height()/2) * .5);
-
     }
 
     gameThumbnail->setPixmap(thumbImg.scaled(thumbnailWidth,thumbnailHeight, Qt::KeepAspectRatio,Qt::SmoothTransformation));
 }
 
 /*
- * Function:
- * Description:
+ * LoadThumbnail checks whether the image get request was successful. If so, it will load the image as the thumbnail
+ * for part of the game display.
  */
-void GameWidget::loadThumbnail(QNetworkReply *reply)
+void GameWidget::loadThumbnail(QNetworkReply * reply)
 {
     if (reply->error() != QNetworkReply::NoError)
     {

@@ -1,7 +1,7 @@
 /*
  *  Author: Andy Dang
  *  Date: 8/3/2019
- *  Description:
+ *  Description: ErrorHandler will be used to display and log error messages through out the application.
  */
 
 #ifndef ERRORHANDLER_H
@@ -18,8 +18,8 @@ public:
     ErrorHandler();
     ~ErrorHandler();
 
-    void errorBox(QWidget *wid, const std::string & msg) const;
-    void errorLog( const std::string & msg);
+    void errorBox(QWidget * wid, const std::string & msg) const;
+    void errorLog(const std::string & msg);
 private:
     std::ofstream errOut;
 };

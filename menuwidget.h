@@ -1,7 +1,14 @@
+/*
+ *  Author: Andy Dang
+ *  Date: 8/1/2019
+ *  Description: MenuWidget populates game models from the fetched JSON. It acts as a specialized doubly linkedlist.
+ *                  It will also handles user inputs and what to display.
+ */
+
 #ifndef MENUWIDGET_H
 #define MENUWIDGET_H
 
-#include "statiddata.h"
+#include "constants.h"
 #include "gamewidget.h"
 #include "gamemodel.h"
 
@@ -10,11 +17,6 @@
 #include <QHBoxLayout>
 
 #include <QNetworkAccessManager>
-/*
- *  Author: Andy Dang
- *  Date: 8/1/2019
- *  Description:
- */
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
@@ -25,16 +27,17 @@ class MenuWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit MenuWidget(QWidget *parent = nullptr);
+    explicit MenuWidget(QWidget * parent = nullptr);
     ~MenuWidget();
     void initLayout();
     void initNetwork();
 
 protected:
-  virtual void  keyPressEvent(QKeyEvent *event);
+  virtual void  keyPressEvent(QKeyEvent * event);
 
 private:
-    void onResult(QNetworkReply* reply);
+    void onResult(QNetworkReply * reply);
+    void initData(const QJsonObject & json);
 
     bool insertFirst(const GameModel & g);
     bool insertLast(const GameModel & g);
@@ -44,7 +47,7 @@ private:
 
     std::string getDate();
 
-    QHBoxLayout *menuLayout;
+    QHBoxLayout * menuLayout;
     QNetworkAccessManager * networkAccessManager;
     std::vector <GameModel> gameDataList;
 

@@ -11,7 +11,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
-MenuWidget::MenuWidget(QWidget *parent) : QWidget(parent)
+MenuWidget::MenuWidget(QWidget * parent) : QWidget(parent)
 {
     maxWidth = maxHeight = selectedGameDataIdx = 0;
     head = tail = focusedGame = nullptr;
@@ -22,8 +22,8 @@ MenuWidget::MenuWidget(QWidget *parent) : QWidget(parent)
 }
 
 /*
- * Function: Init Layout
- * Description:
+ * InitLayout sets the size of the application to the current resolution of the screen.
+ * It will also setup the layout alignment property as well as the background image of the program.
  */
 void MenuWidget::initLayout()
 {
@@ -40,13 +40,13 @@ void MenuWidget::initLayout()
     palette.setBrush(QPalette::Background, bkgnd);
     this->setPalette(palette);
 
-
     this->setLayout(menuLayout);
 }
 
 /*
- * Function: Init Network
- * Description:
+ * InitNetwork checks for internet connection. If there is connection then
+ * it will build the mlb stats URL and perform a get request. Otherwise,
+ * an error box will pop up and the program will terminate.
  */
 void MenuWidget::initNetwork()
 {
@@ -77,10 +77,10 @@ MenuWidget::~MenuWidget()
 }
 
 /*
- * Function: Key Press Event
- * Description:
+ * KeyPressEvent listens for the left and right arrow keys input. If the input is left,
+ * the
  */
-void MenuWidget::keyPressEvent(QKeyEvent *event)
+void MenuWidget::keyPressEvent(QKeyEvent * event)
 {
     if(event == nullptr)
     {
@@ -136,12 +136,14 @@ void MenuWidget::keyPressEvent(QKeyEvent *event)
 }
 
 /*
- * Function: On Result
- * Description:
+ * OnResult retrieves the URL get request response. If the response is not an error and is a JSON
+ * document, it will be converted into a JSON object for later parsing. The function will then
+ * call the InitData function to parse and push each game data onto a vector.
  */
-void MenuWidget::onResult(QNetworkReply *reply)
+void MenuWidget::onResult(QNetworkReply * reply)
 {
-    if(reply->error() != QNetworkReply::NoError){
+    if(reply->error() != QNetworkReply::NoError)
+    {
         errorHandler.errorBox(this,"HTTP Request failed.");
         exit(EXIT_FAILURE);
     }
@@ -167,15 +169,30 @@ void MenuWidget::onResult(QNetworkReply *reply)
         exit(EXIT_FAILURE);
     }
 
-    if (jsonObj.contains("dates") && jsonObj["dates"].isArray())
+    initData(jsonObj);
+
+    reply->deleteLater();
+}
+
+/*
+ * InitData parses the JSON and populate the GameDataList vector with GameModel objects.
+ * It will also populize the doubly linked list to contain the max amount of games to display
+ * on the screen. The head of the list will become the first to be selected/focused.
+ */
+void MenuWidget::initData(const QJsonObject & json)
+{
+    const char * dates = "dates";
+    const char * games = "games";
+
+    if (json.contains(dates) && json[dates].isArray())
     {
-         QJsonArray datesArray = jsonObj["dates"].toArray();
+         QJsonArray datesArray = json[dates].toArray();
          if(!datesArray.isEmpty())
          {
              QJsonObject dates = datesArray[0].toObject();
-             if (dates.contains("games") && dates["games"].isArray())
+             if (dates.contains(games) && dates[games].isArray())
              {
-                 QJsonArray gamesArray = dates["games"].toArray();
+                 QJsonArray gamesArray = dates[games].toArray();
                  for (int gameIdx = 0; gameIdx < gamesArray.size(); ++gameIdx)
                  {
                     QJsonObject gameJson = gamesArray[gameIdx].toObject();
@@ -213,13 +230,14 @@ void MenuWidget::onResult(QNetworkReply *reply)
     {
         errorHandler.errorLog("Dates JSON does not exist.");
     }
-
-    reply->deleteLater();
 }
 
 /*
- * Function: Insert First
- * Description:
+ * InsertFirst will insert a new GameWidget to the head of the list. If the
+ * list is currently empty, then a new GameWidget is allocated and set to become
+ * the head and the tail of the list. Otherwise, the new GameWidget's next
+ * will reference the current head, and the current head's previous will reference
+ * the new GameWidget. The new GameWidget will become the new head.
  */
 bool MenuWidget::insertFirst(const GameModel & g)
 {
@@ -245,8 +263,11 @@ bool MenuWidget::insertFirst(const GameModel & g)
 }
 
 /*
- * Function: Insert Last
- * Description:
+ * InsertLast will insert a new GameWidget to the tail of the list. If the
+ * list is currently empty, then InsertFirst will handle the insertion. Otherwise,
+ * a new GameWidget object is allocated and initialized. The current tail's next
+ * will reference the new GameWidget, and the new GameWidget's previous will reference
+ * the current tail. The new GameWidget will become the new tail.
  */
 bool MenuWidget::insertLast(const GameModel & g)
 {
@@ -269,8 +290,11 @@ bool MenuWidget::insertLast(const GameModel & g)
 }
 
 /*
- * Function: Delete First
- * Description:
+ * DeleteFirst will deallocate the head of the doubly linkedlist. If
+ * there is only one GameWidget in the list, then it will free single
+ * GameWidget and delete all references to it. Otherwise, all references
+ * to the current head will be cut and the head's memory will be deallocated.
+ * The node next to the current head will become the new head.
  */
 bool MenuWidget::deleteFirst()
 {
@@ -295,8 +319,11 @@ bool MenuWidget::deleteFirst()
 }
 
 /*
- * Function: Delete Last
- * Description:
+ * DeleteLast will deallocate the tail of the doubly linkedlist. If there
+ * is only one GameWidget in the list, then DeleteFirst will handle the
+ * deletion. Otherwise, all references to the current tail will be cut
+ * and the current tail memory will be free. The node previous to the current
+ * tail will then become the new tail.
  */
 bool MenuWidget::deleteLast()
 {
@@ -319,62 +346,21 @@ bool MenuWidget::deleteLast()
 }
 
 /*
- * Function: Get Date
- * Description:
+ * GetDate will calculate yesterday's date, utilizing the ctime library,
+ * and return it as a string in a YY-MM-DD format.
  */
 std::string MenuWidget::getDate()
 {
-    time_t tt;
-    time( &tt );
-    tm TM = *localtime( &tt );
+    time_t now = time(nullptr);
+    tm *date = localtime(&now); //Get current date.
+    --date->tm_mday; //Move back 1 day
     std::stringstream ss;
 
-    int year = TM.tm_year+1900;
-    int month = TM.tm_mon+1;
-    int day= TM.tm_mday;
+    int year = date->tm_year+1900;
+    int month = date->tm_mon+1;
+    int day= date->tm_mday;
 
-    if(day == 1)
-        {
-            //months which have 30 days in previous month
-            if(month == 4|| month == 6 || month == 9|| month == 11)
-            {
-                day = 31;
-                month--;
-            }
-            //for MARCH, to define february last day
-            else if(month==3)
-            {
-                if(year%4==0)
-                    day=29;
-                else
-                    day=28;
 
-                month--;
-            }
-            //for January, to define December last day
-            else if(month==1)
-            {
-                day=31;
-                month = 12;
-                year--;
-            }
-            //for Feb, to define January last day
-            else if(month==2)
-            {
-                day=31;
-                month--;
-            }
-            //for other months
-            else
-            {
-                day=30;
-                month--;
-            }
-        }
-    else
-    {
-        day--;
-    }
     ss << year << '-' << month << '-' << day;
     return ss.str();
 }

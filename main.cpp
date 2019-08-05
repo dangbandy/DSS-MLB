@@ -1,13 +1,15 @@
+/*
+ * Author: Andy Dang
+ * Date: 8/1/2019
+ * Description: The main function executes and display the full program.
+ */
+
 #include "menuwidget.h"
 #include <QApplication>
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
     QApplication a(argc, argv);
-
-    qDebug() << "SslSupport: " << QSslSocket::supportsSsl();
-    qDebug() << "SslLibraryBuildVersion: " << QSslSocket::sslLibraryBuildVersionString();
-    qDebug() << "SslLibraryRuntimeVersion: " << QSslSocket::sslLibraryVersionString();
 
     MenuWidget * menu = new MenuWidget();
     menu->initNetwork();

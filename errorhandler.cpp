@@ -10,7 +10,7 @@ ErrorHandler::~ErrorHandler()
     errOut.close();
 }
 
-void ErrorHandler::errorBox(QWidget *wid, const std::string & msg) const
+void ErrorHandler::errorBox(QWidget * wid, const std::string & msg) const
 {
     QMessageBox::critical(wid, "Info", msg.c_str());
 }
