@@ -364,20 +364,22 @@ bool MenuWidget::deleteLast()
 }
 
 /*
- * GetDate will calculate yesterday's date, utilizing the ctime library,
+ * GetDate will calculate today's date, utilizing the ctime library,
  * and return it as a string in a YY-MM-DD format.
  */
 std::string MenuWidget::getDate()
 {
     time_t now = time(nullptr);
     tm *date = localtime(&now); //Get current date.
-    --date->tm_mday; //Move back 1 day
+
+    //Uncomment line below to get yesterday's date.
+    //--date->tm_mday;
+
     std::stringstream ss;
 
     int year = date->tm_year+1900;
     int month = date->tm_mon+1;
     int day= date->tm_mday;
-
 
     ss << year << '-' << month << '-' << day;
     return ss.str();
